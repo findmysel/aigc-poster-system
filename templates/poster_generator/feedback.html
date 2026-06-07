@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}海报反馈 - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-chat-square-text"></i> 海报反馈</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            {% if project.final_poster %}
+                            <img src="{{ project.final_poster.url }}" class="img-fluid rounded" alt="{{ project.title }}">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h5>{{ project.title }}</h5>
+                            <p class="text-muted">{{ project.created_at|date:"Y-m-d H:i" }} 生成</p>
+                            <p class="text-muted">您的反馈将帮助我们改进生成效果，并优化您的用户画像。</p>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">您对这张海报的满意度如何？</label>
+                            <div class="btn-group w-100" role="group">
+                                {% for choice in form.satisfaction.field.choices %}
+                                <input type="radio" class="btn-check" name="satisfaction" id="satisfaction{{ choice.0 }}" value="{{ choice.0 }}" {% if forloop.first %}checked{% endif %}>
+                                <label class="btn btn-outline-primary" for="satisfaction{{ choice.0 }}">{{ choice.1 }}</label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">需要调整哪些方面？（可多选）</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        {{ form.adjust_style }}
+                                        <label class="form-check-label" for="id_adjust_style">
+                                            <i class="bi bi-palette"></i> 调整风格
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        {{ form.adjust_color }}
+                                        <label class="form-check-label" for="id_adjust_color">
+                                            <i class="bi bi-droplet"></i> 调整色彩
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        {{ form.adjust_layout }}
+                                        <label class="form-check-label" for="id_adjust_layout">
+                                            <i class="bi bi-layout-text-window"></i> 调整布局
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        {{ form.adjust_copy }}
+                                        <label class="form-check-label" for="id_adjust_copy">
+                                            <i class="bi bi-fonts"></i> 调整文案
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">详细反馈（可选）</label>
+                            {{ form.feedback_text }}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'poster_detail' project.id %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> 返回
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> 提交反馈
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

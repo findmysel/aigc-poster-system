@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}登录 - 海报工坊{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm" style="border-radius: 24px;">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" 
+                             style="width: 80px; height: 80px; background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%); transform: rotate(-5deg);">
+                            <i class="bi bi-person-circle fs-1 text-white" style="transform: rotate(5deg);"></i>
+                        </div>
+                        <h3 class="fw-bold">欢迎回来</h3>
+                        <p class="text-muted">登录后继续创作</p>
+                    </div>
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label fw-medium">用户名</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-person text-muted"></i>
+                                </span>
+                                {{ form.username }}
+                            </div>
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.username.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="id_password" class="form-label fw-medium">密码</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-lock text-muted"></i>
+                                </span>
+                                {{ form.password }}
+                            </div>
+                            {% if form.password.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.password.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i> 登录
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-muted mb-0">还没有账号？<a href="{% url 'register' %}" class="fw-bold">立即注册</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 为表单添加样式
+    document.getElementById('id_username').className = 'form-control border-start-0';
+    document.getElementById('id_username').placeholder = '请输入用户名';
+    document.getElementById('id_password').className = 'form-control border-start-0';
+    document.getElementById('id_password').placeholder = '请输入密码';
+</script>
+{% endblock %}

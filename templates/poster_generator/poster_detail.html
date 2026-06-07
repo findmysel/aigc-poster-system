@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.title }} - AIGC海报工坊{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- 海报展示 -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ project.title }}</h5>
+                    <div>
+                        {% if project.is_favorite %}
+                        <span class="badge bg-danger"><i class="bi bi-heart-fill"></i> 已收藏</span>
+                        {% endif %}
+                        <span class="badge bg-{{ project.status|yesno:'success,warning,danger' }}">
+                            {{ project.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body text-center p-0">
+                    {% if project.final_poster %}
+                    <img src="{{ project.final_poster.url }}" class="img-fluid" alt="{{ project.title }}" style="max-height: 800px;">
+                    {% elif project.generated_image %}
+                    <img src="{{ project.generated_image.url }}" class="img-fluid" alt="{{ project.title }}" style="max-height: 800px;">
+                    <div class="alert alert-info m-3">
+                        <i class="bi bi-info-circle"></i> 正在进行海报合成
+                    </div>
+                    {% else %}
+                    <div class="py-5">
+                        <i class="bi bi-image display-1 text-muted"></i>
+                        <p class="text-muted mt-3">{{ project.get_status_display }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if project.final_poster %}
+                <div class="card-footer bg-transparent">
+                    <div class="row text-center">
+                        <div class="col">
+                            <h6 class="mb-0">{{ copy_data.headline|default:"-" }}</h6>
+                            <small class="text-muted">主标题</small>
+                        </div>
+                        <div class="col">
+                            <h6 class="mb-0">{{ copy_data.subheadline|default:"-" }}</h6>
+                            <small class="text-muted">副标题</small>
+                        </div>
+                        <div class="col">
+                            <h6 class="mb-0">{{ copy_data.cta|default:"-" }}</h6>
+                            <small class="text-muted">行动号召</small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- 侧边信息 -->
+        <div class="col-lg-4">
+            <!-- 操作按钮 -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if project.final_poster %}
+                        <a href="{% url 'download_poster' project.id %}" class="btn btn-success">
+                            <i class="bi bi-download"></i> 下载海报
+                        </a>
+                        <a href="{% url 'edit_poster' project.id %}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> 编辑文案
+                        </a>
+                        {% endif %}
+                        
+                        {% if project.status == 'completed' %}
+                        <a href="{% url 'poster_feedback' project.id %}" class="btn btn-outline-info">
+                            <i class="bi bi-chat-square-text"></i> 
+                            {% if project.user_satisfaction %}修改反馈{% else %}提交反馈{% endif %}
+                        </a>
+                        {% endif %}
+                        
+                        <button class="btn btn-outline-secondary favorite-btn" data-project-id="{{ project.id }}">
+                            <i class="bi bi-heart{% if project.is_favorite %}-fill{% endif %}"></i>
+                            {% if project.is_favorite %}取消收藏{% else %}收藏海报{% endif %}
+                        </button>
+
+                        {% if project.status == 'completed' %}
+                        <a href="{% url 'reuse_style' project.id %}" class="btn btn-outline-warning">
+                            <i class="bi bi-arrow-repeat"></i> 复用此风格
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 海报信息 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> 海报信息</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>创建时间</span>
+                            <span class="text-muted">{{ project.created_at|date:"Y-m-d H:i" }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>更新时间</span>
+                            <span class="text-muted">{{ project.updated_at|date:"Y-m-d H:i" }}</span>
+                        </li>
+                        {% if project.user_satisfaction %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>满意度</span>
+                            <span>
+                                {% for i in "x"|rjust:project.user_satisfaction %}
+                                <i class="bi bi-star-fill text-warning"></i>
+                                {% endfor %}
+                            </span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 生成参数 -->
+            {% if project.generation_params %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-gear"></i> 生成参数</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% if project.generation_params.content_type %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>内容类型</span>
+                            <span class="badge bg-info">{{ project.generation_params.content_type }}</span>
+                        </li>
+                        {% endif %}
+                        {% if project.generation_params.style_override %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>风格覆盖</span>
+                            <span class="badge bg-primary">{{ project.generation_params.style_override }}</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- 提示词预览 -->
+            {% if project.optimized_prompt %}
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-code-square"></i> 生成提示词</h6>
+                </div>
+                <div class="card-body">
+                    <pre class="small text-muted" style="white-space: pre-wrap;">{{ project.optimized_prompt }}</pre>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 收藏功能
+    document.querySelector('.favorite-btn').addEventListener('click', function() {
+        const projectId = this.dataset.projectId;
+        const icon = this.querySelector('i');
+        const text = this.lastChild;
+        
+        fetch(`/poster/${projectId}/favorite/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.is_favorite) {
+                icon.classList.remove('bi-heart');
+                icon.classList.add('bi-heart-fill');
+                text.textContent = ' 取消收藏';
+            } else {
+                icon.classList.remove('bi-heart-fill');
+                icon.classList.add('bi-heart');
+                text.textContent = ' 收藏海报';
+            }
+        });
+    });
+</script>
+{% endblock %}

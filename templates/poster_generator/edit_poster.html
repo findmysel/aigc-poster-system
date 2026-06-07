@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}编辑海报 - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- 编辑表单 -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pencil"></i> 编辑海报信息</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" id="editForm">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">海报标题</label>
+                            {{ form.title }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">海报描述</label>
+                            {{ form.description }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">海报文案 (JSON格式)</label>
+                            {{ form.generated_copy }}
+                            <div class="form-text">
+                                格式：{"headline": "主标题", "subheadline": "副标题", "cta": "行动号召"}
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- 文案位置 -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-layout-text-window-reverse"></i> 文案位置
+                            </label>
+                            {{ form.layout }}
+                        </div>
+
+                        <!-- 文字颜色 -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-palette"></i> 文字颜色
+                            </label>
+                            <div class="d-flex gap-2 flex-wrap mt-1" id="colorPicker">
+                                {% for value, label in form.text_color.field.choices %}
+                                <label class="color-swatch-label" title="{{ label }}">
+                                    <input type="radio" name="text_color" value="{{ value }}"
+                                        {% if form.text_color.value == value %}checked{% elif forloop.first and not form.text_color.value %}checked{% endif %}
+                                        class="d-none color-radio">
+                                    <span class="color-swatch d-inline-block rounded border"
+                                        style="width:36px;height:36px;background:{{ value }};cursor:pointer;transition:transform .15s,box-shadow .15s;">
+                                    </span>
+                                    <span class="d-block text-center small mt-1">{{ label }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'poster_detail' project.id %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> 返回
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> 保存更改
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 预览 -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-eye"></i> 当前海报</h5>
+                </div>
+                <div class="card-body text-center p-0">
+                    {% if project.final_poster %}
+                    <img src="{{ project.final_poster.url }}" class="img-fluid" alt="{{ project.title }}" id="posterPreview">
+                    {% elif project.generated_image %}
+                    <img src="{{ project.generated_image.url }}" class="img-fluid" alt="{{ project.title }}" id="posterPreview">
+                    {% else %}
+                    <div class="py-5">
+                        <i class="bi bi-image display-1 text-muted"></i>
+                        <p class="text-muted mt-3">暂无可预览的海报</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 文案预览 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-file-earmark-text"></i> 当前文案</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td width="100"><strong>主标题</strong></td>
+                            <td id="previewHeadline">{{ copy_data.headline|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>副标题</strong></td>
+                            <td id="previewSubheadline">{{ copy_data.subheadline|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>行动号召</strong></td>
+                            <td id="previewCta">{{ copy_data.cta|default:"-" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 当前设置 -->
+            <div class="card mt-3">
+                <div class="card-body py-2 px-3">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        保存后将根据所选位置和颜色重新合成海报
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.color-swatch-label { text-align: center; cursor: pointer; }
+.color-radio:checked + .color-swatch {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 3px #FF6B6B;
+}
+.color-swatch:hover { transform: scale(1.1); }
+</style>
+
+<script>
+// 实时更新文案预览
+document.getElementById('id_generated_copy').addEventListener('input', function() {
+    try {
+        const data = JSON.parse(this.value);
+        document.getElementById('previewHeadline').textContent = data.headline || '-';
+        document.getElementById('previewSubheadline').textContent = data.subheadline || '-';
+        document.getElementById('previewCta').textContent = data.cta || '-';
+    } catch(e) {}
+});
+</script>
+{% endblock %}

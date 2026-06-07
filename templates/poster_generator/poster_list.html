@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block title %}我的海报 - AIGC海报工坊{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold"><i class="bi bi-images"></i> 我的海报</h3>
+            <p class="text-muted mb-0">共 {{ total_count }} 张海报</p>
+        </div>
+        <a href="{% url 'generate_poster' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> 生成新海报
+        </a>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    {{ filter_form.search }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.status }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.date_from }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.date_to }}
+                </div>
+                <div class="col-md-1">
+                    <div class="form-check mt-2">
+                        {{ filter_form.favorites_only }}
+                        <label class="form-check-label small" for="id_favorites_only">仅收藏</label>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-funnel"></i> 筛选
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 海报网格 -->
+    <div class="row g-4">
+        {% for project in page_obj %}
+        <div class="col-md-4 col-lg-3">
+            <div class="card h-100 poster-card">
+                <div class="position-relative">
+                    {% if project.final_poster %}
+                    <img src="{{ project.final_poster.url }}" class="card-img-top" alt="{{ project.title }}" style="height: 200px; object-fit: cover;">
+                    {% elif project.generated_image %}
+                    <img src="{{ project.generated_image.url }}" class="card-img-top" alt="{{ project.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <div class="text-center">
+                            <i class="bi bi-image display-4 text-muted"></i>
+                            <p class="text-muted small mt-2">{{ project.get_status_display }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- 收藏按钮 -->
+                    <button class="btn btn-sm btn-light position-absolute top-0 end-0 m-2 favorite-btn"
+                            data-project-id="{{ project.id }}">
+                        <i class="bi bi-heart{% if project.is_favorite %}-fill text-danger{% endif %}"></i>
+                    </button>
+
+                    <!-- 状态标签 -->
+                    {% if project.status == 'failed' %}
+                    <span class="badge bg-danger position-absolute bottom-0 start-0 m-2">生成失败</span>
+                    {% elif project.status == 'generating' %}
+                    <span class="badge bg-warning position-absolute bottom-0 start-0 m-2">生成中</span>
+                    {% endif %}
+                </div>
+
+                <div class="card-body">
+                    <h6 class="card-title text-truncate">{{ project.title }}</h6>
+                    <p class="card-text small text-muted">
+                        {{ project.created_at|date:"Y-m-d H:i" }}
+                        {% if project.user_satisfaction %}
+                        <span class="ms-2">
+                            {% for i in "x"|rjust:project.user_satisfaction %}
+                            <i class="bi bi-star-fill text-warning" style="font-size: 0.7rem;"></i>
+                            {% endfor %}
+                        </span>
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="card-footer bg-transparent">
+                    <div class="d-flex gap-1">
+                        <a href="{% url 'poster_detail' project.id %}" class="btn btn-sm btn-outline-primary flex-grow-1">
+                            <i class="bi bi-eye"></i> 查看
+                        </a>
+                        {% if project.final_poster %}
+                        <a href="{% url 'download_poster' project.id %}" class="btn btn-sm btn-outline-success flex-grow-1">
+                            <i class="bi bi-download"></i> 下载
+                        </a>
+                        {% endif %}
+                        <button class="btn btn-sm btn-outline-danger delete-btn"
+                                data-project-id="{{ project.id }}"
+                                data-project-title="{{ project.title }}"
+                                title="删除">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="bi bi-images display-1 text-muted"></i>
+                <h4 class="mt-4 text-muted">还没有海报</h4>
+                <p class="text-muted">快去生成您的第一张海报吧！</p>
+                <a href="{% url 'generate_poster' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle"></i> 立即生成
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- 分页 -->
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <!-- 删除确认弹窗 -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle text-danger"></i> 确认删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    确定要删除海报「<strong id="deleteModalTitle"></strong>」吗？此操作不可恢复。
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <form id="deleteForm" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> 确认删除
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 收藏功能
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const projectId = this.dataset.projectId;
+            const icon = this.querySelector('i');
+
+            fetch(`/poster/${projectId}/favorite/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.is_favorite) {
+                    icon.classList.remove('bi-heart');
+                    icon.classList.add('bi-heart-fill', 'text-danger');
+                } else {
+                    icon.classList.remove('bi-heart-fill', 'text-danger');
+                    icon.classList.add('bi-heart');
+                }
+            });
+        });
+    });
+
+    // 删除功能
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const projectId = this.dataset.projectId;
+            const title = this.dataset.projectTitle;
+            document.getElementById('deleteModalTitle').textContent = title;
+            document.getElementById('deleteForm').action = `/poster/${projectId}/delete/`;
+            deleteModal.show();
+        });
+    });
+</script>
+{% endblock %}

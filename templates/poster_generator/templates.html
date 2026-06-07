@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}模板库 - AIGC海报工坊{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold"><i class="bi bi-grid-3x3-gap"></i> 海报模板库</h2>
+        <p class="text-muted">选择喜欢的模板，快速生成个性化海报</p>
+    </div>
+    
+    <!-- 风格筛选 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'template_gallery' %}" class="btn {% if not request.GET.style %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    全部
+                </a>
+                {% for style_value, style_name in style_choices %}
+                <a href="?style={{ style_value }}" class="btn {% if request.GET.style == style_value %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {{ style_name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模板网格 -->
+    <div class="row g-4">
+        {% for template in templates %}
+        <div class="col-md-4 col-lg-3">
+            <div class="card h-100 template-card">
+                <div class="position-relative">
+                    {% if template.preview_image %}
+                    <img src="{{ template.preview_image.url }}" class="card-img-top" alt="{{ template.name }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="bi bi-image display-4 text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <span class="badge bg-primary position-absolute top-0 end-0 m-2">
+                        {{ template.get_style_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">{{ template.name }}</h6>
+                    <p class="card-text small text-muted">{{ template.description|truncatechars:50 }}</p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{% url 'generate_poster' %}?template={{ template.id }}" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-magic"></i> 使用此模板
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-grid display-1 text-muted"></i>
+            <p class="text-muted mt-3">暂无模板</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

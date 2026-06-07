@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}画像分析 - AIGC海报工坊{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- 侧边栏 -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'profile' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person"></i> 基本信息
+                    </a>
+                    <a href="{% url 'profile_detail' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-sliders"></i> 用户画像
+                    </a>
+                    <a href="{% url 'profile_analysis' %}" class="list-group-item list-group-item-action active">
+                        <i class="bi bi-graph-up"></i> 画像分析
+                    </a>
+                    <a href="{% url 'prompt_preview' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-eye"></i> 提示词预览
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主内容 -->
+        <div class="col-md-9">
+            <h4 class="mb-4"><i class="bi bi-graph-up"></i> 用户画像分析报告</h4>
+            
+            <!-- 统计卡片 -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h3>{{ profile.generation_count }}</h3>
+                            <p class="mb-0">总生成次数</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h3>{{ profile.satisfaction_score|floatformat:1 }}</h3>
+                            <p class="mb-0">平均满意度</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h3>{{ action_counts.generate|default:"0" }}</h3>
+                            <p class="mb-0">生成操作</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h3>{{ action_counts.feedback|default:"0" }}</h3>
+                            <p class="mb-0">反馈次数</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 个性化建议 -->
+            {% if suggestions %}
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-lightbulb"></i> 个性化建议</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for suggestion in suggestions %}
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle-fill text-success"></i> {{ suggestion }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- 行为统计 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-bar-chart"></i> 行为统计</h6>
+                </div>
+                <div class="card-body">
+                    {% if action_counts %}
+                    <div class="row">
+                        {% for action, count in action_counts.items %}
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                <span>{{ action }}</span>
+                                <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">暂无行为数据</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 最近活动 -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-clock-history"></i> 最近活动</h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_logs %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>行为</th>
+                                    <th>时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in recent_logs %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ log.get_action_display }}</span>
+                                    </td>
+                                    <td>{{ log.created_at|date:"Y-m-d H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">暂无活动记录</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

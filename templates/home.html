@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+
+{% block title %}首页 - 海报工坊{% endblock %}
+
+{% block content %}
+<!-- Hero区域 -->
+<section class="hero-section">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4">
+                    轻松创作，个性海报
+                </h1>
+                <p class="lead mb-4 opacity-90">
+                    无需设计基础，输入文字即可生成专属海报<br>
+                    <span class="fs-5">AI懂你，更懂美</span>
+                </p>
+                {% if user.is_authenticated %}
+                <a href="{% url 'generate_poster' %}" class="btn btn-light btn-lg px-5 rounded-pill fw-bold">
+                    <i class="bi bi-magic"></i> 开始创作
+                </a>
+                {% else %}
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'register' %}" class="btn btn-light btn-lg px-5 rounded-pill fw-bold">
+                        <i class="bi bi-person-plus"></i> 免费使用
+                    </a>
+                    <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-4 rounded-pill">
+                        登录
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 特色介绍 -->
+<section class="container mb-5">
+    <div class="text-center mb-5">
+        <span class="badge bg-warning text-dark mb-2">为什么选择我们</span>
+        <h2 class="fw-bold">创作从未如此简单</h2>
+        <p class="text-muted">三步搞定，从想法到成品只需几分钟</p>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4 border-0">
+                <div class="feature-icon">
+                    <i class="bi bi-person-heart"></i>
+                </div>
+                <h4 class="fw-bold mb-3">了解你的喜好</h4>
+                <p class="text-muted">设置一次个人偏好，AI就会记住你喜欢的风格、色彩和排版方式</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4 border-0">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%); transform: rotate(5deg);">
+                    <i class="bi bi-stars" style="transform: rotate(-5deg);"></i>
+                </div>
+                <h4 class="fw-bold mb-3">一键智能生成</h4>
+                <p class="text-muted">输入主题文字，AI自动完成图片创作、文案撰写和排版设计</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4 border-0">
+                <div class="feature-icon" style="background: linear-gradient(135deg, #A8E063 0%, #56AB2F 100%); transform: rotate(-3deg);">
+                    <i class="bi bi-download" style="transform: rotate(3deg);"></i>
+                </div>
+                <h4 class="fw-bold mb-3">随时下载分享</h4>
+                <p class="text-muted">高清原图一键下载，朋友圈、公众号、宣传海报随心用</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 使用流程 -->
+<section class="container mb-5">
+    <div class="card border-0 p-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">使用流程</h2>
+            <p class="text-muted">简单四步，轻松上手</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="step-card card h-100">
+                    <div class="step-number">1</div>
+                    <div class="mt-3">
+                        <i class="bi bi-sliders fs-1 text-warning mb-3 d-block"></i>
+                        <h5 class="fw-bold">完善画像</h5>
+                        <p class="text-muted small mb-0">告诉我们你喜欢的风格</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card card h-100">
+                    <div class="step-number" style="background: #4ECDC4;">2</div>
+                    <div class="mt-3">
+                        <i class="bi bi-input-cursor-text fs-1 text-info mb-3 d-block"></i>
+                        <h5 class="fw-bold">输入需求</h5>
+                        <p class="text-muted small mb-0">描述海报主题内容</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card card h-100">
+                    <div class="step-number" style="background: #56AB2F;">3</div>
+                    <div class="mt-3">
+                        <i class="bi bi-magic fs-1 text-success mb-3 d-block"></i>
+                        <h5 class="fw-bold">AI生成</h5>
+                        <p class="text-muted small mb-0">等待几秒，自动创作</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card card h-100">
+                    <div class="step-number" style="background: #764ba2;">4</div>
+                    <div class="mt-3">
+                        <i class="bi bi-check-circle fs-1 text-primary mb-3 d-block"></i>
+                        <h5 class="fw-bold">下载使用</h5>
+                        <p class="text-muted small mb-0">保存并分享你的作品</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 适用场景 -->
+<section class="container mb-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">适合各种场景</h2>
+        <p class="text-muted">无论你是个人还是商家，都能找到合适的用途</p>
+    </div>
+    
+    <div class="row g-3">
+        <div class="col-6 col-md-3">
+            <div class="card text-center p-3 h-100 border-0" style="background: #FFF5E6;">
+                <i class="bi bi-shop fs-2 text-warning mb-2"></i>
+                <h6 class="fw-bold mb-1">促销宣传</h6>
+                <p class="text-muted small mb-0">打折、满减、限时活动</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center p-3 h-100 border-0" style="background: #E6F7FF;">
+                <i class="bi bi-calendar-event fs-2 text-info mb-2"></i>
+                <h6 class="fw-bold mb-1">活动邀约</h6>
+                <p class="text-muted small mb-0">聚会、展览、演出预告</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center p-3 h-100 border-0" style="background: #F0FFE6;">
+                <i class="bi bi-emoji-smile fs-2 text-success mb-2"></i>
+                <h6 class="fw-bold mb-1">节日祝福</h6>
+                <p class="text-muted small mb-0">新年、中秋、生日贺卡</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center p-3 h-100 border-0" style="background: #F3E6FF;">
+                <i class="bi bi-share fs-2 text-primary mb-2"></i>
+                <h6 class="fw-bold mb-1">社交分享</h6>
+                <p class="text-muted small mb-0">朋友圈、小红书封面</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 最新作品 -->
+{% if user.is_authenticated %}
+<section class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">我的最新作品</h2>
+            <p class="text-muted mb-0">共 {{ user.poster_projects.count }} 张海报</p>
+        </div>
+        <a href="{% url 'poster_list' %}" class="btn btn-outline-primary rounded-pill">
+            查看全部 <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+    
+    <div class="row g-4">
+        {% for project in user.poster_projects.all|slice:":4" %}
+        <div class="col-md-3">
+            <div class="card h-100 poster-card overflow-hidden">
+                {% if project.final_poster %}
+                <div class="position-relative">
+                    <img src="{{ project.final_poster.url }}" class="card-img-top" alt="{{ project.title }}" style="height: 200px; object-fit: cover;">
+                    <div class="position-absolute bottom-0 start-0 end-0 p-2" style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);">
+                        <small class="text-white">{{ project.created_at|date:"m月d日" }}</small>
+                    </div>
+                </div>
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="bi bi-image display-4 text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body p-3">
+                    <h6 class="card-title text-truncate fw-bold mb-1">{{ project.title }}</h6>
+                    <span class="badge bg-light text-dark small">{{ project.get_status_display }}</span>
+                </div>
+                <div class="card-footer bg-transparent border-0 p-3 pt-0">
+                    <a href="{% url 'poster_detail' project.id %}" class="btn btn-sm btn-primary w-100 rounded-pill">查看详情</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="mb-3">
+                <i class="bi bi-images display-1 text-muted opacity-25"></i>
+            </div>
+            <h5 class="text-muted mb-3">还没有作品</h5>
+            <p class="text-muted mb-4">快去创作你的第一张海报吧！</p>
+            <a href="{% url 'generate_poster' %}" class="btn btn-primary btn-lg rounded-pill px-5">
+                <i class="bi bi-magic"></i> 立即创作
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA区域 -->
+<section class="container mb-5">
+    <div class="card text-center p-5 border-0 position-relative overflow-hidden" style="background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);">
+        <div class="position-relative" style="z-index: 1;">
+            <h2 class="fw-bold mb-3 text-white">准备好开始创作了吗？</h2>
+            <p class="lead mb-4 text-white opacity-90">现在注册，免费体验智能海报生成服务</p>
+            {% if not user.is_authenticated %}
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'register' %}" class="btn btn-light btn-lg px-5 rounded-pill fw-bold">
+                    立即注册
+                </a>
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-4 rounded-pill">
+                    已有账号？登录
+                </a>
+            </div>
+            {% else %}
+            <a href="{% url 'generate_poster' %}" class="btn btn-light btn-lg px-5 rounded-pill fw-bold">
+                <i class="bi bi-magic"></i> 开始创作
+            </a>
+            {% endif %}
+        </div>
+        <!-- 装饰圆圈 -->
+        <div class="position-absolute" style="top: -50%; right: -10%; width: 400px; height: 400px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+        <div class="position-absolute" style="bottom: -30%; left: -5%; width: 300px; height: 300px; background: rgba(78, 205, 196, 0.2); border-radius: 50%;"></div>
+    </div>
+</section>
+
+<!-- 用户评价 -->
+<section class="container mb-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">用户怎么说</h2>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 p-4 border-0" style="background: #f8f9fa;">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                        <span class="fw-bold text-white">小</span>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold">小王</h6>
+                        <small class="text-muted">餐饮店主</small>
+                    </div>
+                </div>
+                <p class="text-muted mb-0">"以前做促销海报要找设计师，现在自己几分钟就做好了，效果还挺专业！"</p>
+                <div class="mt-2 text-warning">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 p-4 border-0" style="background: #f8f9fa;">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle bg-info d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                        <span class="fw-bold text-white">L</span>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold">Linda</h6>
+                        <small class="text-muted">自媒体博主</small>
+                    </div>
+                </div>
+                <p class="text-muted mb-0">"AI很懂我的审美，生成的海报每次都很符合我想要的感觉，省了好多时间。"</p>
+                <div class="mt-2 text-warning">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 p-4 border-0" style="background: #f8f9fa;">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle bg-success d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                        <span class="fw-bold text-white">张</span>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold">张老师</h6>
+                        <small class="text-muted">培训机构</small>
+                    </div>
+                </div>
+                <p class="text-muted mb-0">"招生海报、活动海报都用这个做，家长都说看着很专业，推荐！"</p>
+                <div class="mt-2 text-warning">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-half"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

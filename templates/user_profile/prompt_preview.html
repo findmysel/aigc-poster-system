@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}提示词预览 - AIGC海报工坊{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- 侧边栏 -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'profile' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person"></i> 基本信息
+                    </a>
+                    <a href="{% url 'profile_detail' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-sliders"></i> 用户画像
+                    </a>
+                    <a href="{% url 'profile_analysis' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-graph-up"></i> 画像分析
+                    </a>
+                    <a href="{% url 'prompt_preview' %}" class="list-group-item list-group-item-action active">
+                        <i class="bi bi-eye"></i> 提示词预览
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主内容 -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-eye"></i> AI提示词预览</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        以下内容展示了系统根据您的用户画像自动生成的AI提示词示例。<br>
+                        实际生成时会根据您输入的具体需求进行动态调整。
+                    </div>
+                    
+                    <h6 class="text-primary mb-3">您的画像特征</h6>
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-palette fs-2 text-primary"></i>
+                                    <h6 class="mt-2">风格</h6>
+                                    <p class="mb-0">{{ profile.get_preferred_style_display|default:"未设置" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-droplet fs-2 text-info"></i>
+                                    <h6 class="mt-2">色彩</h6>
+                                    <p class="mb-0">{{ profile.get_preferred_color_display|default:"未设置" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-file-earmark-text fs-2 text-success"></i>
+                                    <h6 class="mt-2">内容类型</h6>
+                                    <p class="mb-0">{{ profile.get_preferred_content_display|default:"未设置" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="text-primary mb-3">示例提示词</h6>
+                    {% for sample in sample_prompts %}
+                    <div class="card mb-3 border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <i class="bi bi-quote"></i> 示例 {{ forloop.counter }}：{{ sample.description }}
+                        </div>
+                        <div class="card-body">
+                            <pre class="mb-0" style="white-space: pre-wrap;">{{ sample.prompt }}</pre>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'profile_detail' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> 返回画像设置
+                        </a>
+                        <a href="{% url 'generate_poster' %}" class="btn btn-primary">
+                            <i class="bi bi-magic"></i> 去生成海报
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

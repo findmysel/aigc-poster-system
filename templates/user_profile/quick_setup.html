@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}快速设置用户画像 - AIGC海报工坊{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-lightning-charge"></i> 快速设置用户画像</h4>
+                </div>
+                <div class="card-body p-5">
+                    <p class="text-muted text-center mb-4">
+                        只需回答几个简单问题，即可快速建立您的用户画像<br>
+                        系统会根据您的选择自动优化海报生成效果
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- 步骤1：使用场景 -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">1. 您主要的使用场景是什么？</label>
+                            <div class="row g-3">
+                                {% for choice in form.use_case.field.choices %}
+                                <div class="col-md-6">
+                                    <div class="form-check card p-3 border">
+                                        <input class="form-check-input" type="radio" name="use_case" 
+                                               id="use_case_{{ forloop.counter }}" value="{{ choice.0 }}" 
+                                               {% if forloop.first %}checked{% endif %}>
+                                        <label class="form-check-label w-100" for="use_case_{{ forloop.counter }}">
+                                            <h6 class="mb-1">{{ choice.1 }}</h6>
+                                            <small class="text-muted">
+                                                {% if choice.0 == 'personal' %}制作个人分享、生活记录等海报{% endif %}
+                                                {% if choice.0 == 'business' %}制作产品推广、品牌宣传等海报{% endif %}
+                                                {% if choice.0 == 'social' %}制作社交媒体内容、朋友圈分享等{% endif %}
+                                                {% if choice.0 == 'event' %}制作活动邀请、展会宣传等海报{% endif %}
+                                            </small>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- 步骤2：风格氛围 -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">2. 您偏好哪种风格氛围？</label>
+                            <div class="row g-3">
+                                {% for choice in form.style_vibe.field.choices %}
+                                <div class="col-md-6">
+                                    <div class="form-check card p-3 border">
+                                        <input class="form-check-input" type="radio" name="style_vibe" 
+                                               id="style_{{ forloop.counter }}" value="{{ choice.0 }}"
+                                               {% if forloop.first %}checked{% endif %}>
+                                        <label class="form-check-label w-100" for="style_{{ forloop.counter }}">
+                                            <h6 class="mb-1">{{ choice.1 }}</h6>
+                                            <small class="text-muted">
+                                                {% if choice.0 == 'professional' %}简洁干练，适合商务场景{% endif %}
+                                                {% if choice.0 == 'casual' %}轻松活泼，适合日常生活{% endif %}
+                                                {% if choice.0 == 'creative' %}独特有创意，吸引眼球{% endif %}
+                                                {% if choice.0 == 'elegant' %}精致典雅，品质感强{% endif %}
+                                            </small>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- 步骤3：色彩氛围 -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">3. 您偏好哪种色彩氛围？</label>
+                            <div class="row g-3">
+                                {% for choice in form.color_mood.field.choices %}
+                                <div class="col-md-6">
+                                    <div class="form-check card p-3 border">
+                                        <input class="form-check-input" type="radio" name="color_mood" 
+                                               id="color_{{ forloop.counter }}" value="{{ choice.0 }}"
+                                               {% if forloop.first %}checked{% endif %}>
+                                        <label class="form-check-label w-100" for="color_{{ forloop.counter }}">
+                                            <h6 class="mb-1">{{ choice.1 }}</h6>
+                                            <small class="text-muted">
+                                                {% if choice.0 == 'bright' %}鲜艳明快，充满正能量{% endif %}
+                                                {% if choice.0 == 'soft' %}温柔舒适，不刺眼{% endif %}
+                                                {% if choice.0 == 'bold' %}大胆醒目，视觉冲击力{% endif %}
+                                                {% if choice.0 == 'calm' %}宁静沉稳，专业感{% endif %}
+                                            </small>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> 完成设置
+                            </button>
+                            <a href="{% url 'profile_detail' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-gear"></i> 进入详细设置
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

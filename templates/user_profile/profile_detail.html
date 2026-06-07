@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}用户画像 - AIGC海报工坊{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- 侧边栏 -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    {% if user.extension.avatar %}
+                        <img src="{{ user.extension.avatar.url }}" alt="头像" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 100px; height: 100px;">
+                            <i class="bi bi-person display-4 text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <h5 class="mb-1">{{ user.username }}</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'profile' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person"></i> 基本信息
+                    </a>
+                    <a href="{% url 'profile_detail' %}" class="list-group-item list-group-item-action active">
+                        <i class="bi bi-sliders"></i> 用户画像
+                    </a>
+                    <a href="{% url 'profile_analysis' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-graph-up"></i> 画像分析
+                    </a>
+                    <a href="{% url 'prompt_preview' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-eye"></i> 提示词预览
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主内容 -->
+        <div class="col-md-9">
+            <!-- 状态卡片 -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <i class="bi bi-images display-4"></i>
+                            <h3 class="mt-2">{{ stats.generation_count }}</h3>
+                            <p class="mb-0">生成次数</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <i class="bi bi-star-fill display-4"></i>
+                            <h3 class="mt-2">{{ stats.satisfaction_score|default:"0" }}</h3>
+                            <p class="mb-0">满意度</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <i class="bi bi-clock-history display-4"></i>
+                            <h3 class="mt-2">{{ profile.updated_at|date:"m-d" }}</h3>
+                            <p class="mb-0">最近更新</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 画像编辑表单 -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-sliders"></i> 用户画像设置</h5>
+                    <a href="{% url 'quick_setup' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-lightning"></i> 快速设置
+                    </a>
+                </div>
+                <div class="card-body p-4">
+                    {% if is_new %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 欢迎使用！请先设置您的用户画像，以便获得更好的海报生成效果。
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <h6 class="text-primary mb-3">基础信息</h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">年龄段</label>
+                                {{ form.age_group }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">性别</label>
+                                {{ form.gender }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">职业</label>
+                                {{ form.occupation }}
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <h6 class="text-primary mb-3">设计偏好</h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">偏好的设计风格</label>
+                                {{ form.preferred_style }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">偏好的色彩方案</label>
+                                {{ form.preferred_color }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">偏好的内容类型</label>
+                                {{ form.preferred_content }}
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <h6 class="text-primary mb-3">高级偏好</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">字体偏好（可选）</label>
+                                {{ form.font_preference }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">布局偏好（可选）</label>
+                                {{ form.layout_preference }}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> 保存画像
+                            </button>
+                            <a href="{% url 'prompt_preview' %}" class="btn btn-outline-info">
+                                <i class="bi bi-eye"></i> 预览提示词
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 最近行为 -->
+            {% if stats.recent_logs %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-clock-history"></i> 最近活动</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for log in stats.recent_logs|slice:":5" %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="bi bi-circle-fill text-primary" style="font-size: 0.5rem;"></i>
+                                {{ log.get_action_display }}
+                            </span>
+                            <small class="text-muted">{{ log.created_at|timesince }}前</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

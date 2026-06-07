@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}提交反馈 - AIGC海报工坊{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-chat-dots"></i> 意见反馈</h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">
+                        您的意见对我们非常重要！如果您有任何问题、建议或发现Bug，请通过以下表单告诉我们。
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">反馈类型</label>
+                                {{ form.feedback_type }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">联系邮箱（可选）</label>
+                                {{ form.contact_email }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">标题</label>
+                            {{ form.title }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">详细内容</label>
+                            {{ form.content }}
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send"></i> 提交反馈
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

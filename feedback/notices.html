@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}系统公告 - AIGC海报工坊{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold"><i class="bi bi-broadcast"></i> 系统公告</h2>
+        <p class="text-muted">了解最新动态和功能更新</p>
+    </div>
+    
+    <div class="row g-4">
+        {% for notice in notices %}
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ notice.title }}</h5>
+                    {% if notice.priority > 5 %}
+                    <span class="badge bg-danger">重要</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ notice.content|linebreaks }}</p>
+                </div>
+                <div class="card-footer text-muted">
+                    <small><i class="bi bi-clock"></i> {{ notice.created_at|date:"Y-m-d" }}</small>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-broadcast display-1 text-muted"></i>
+            <p class="text-muted mt-3">暂无公告</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

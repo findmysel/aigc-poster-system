@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}我的反馈 - AIGC海报工坊{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold"><i class="bi bi-chat-dots"></i> 我的反馈</h3>
+        <a href="{% url 'submit_feedback' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> 提交新反馈
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-body p-0">
+            {% if page_obj %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>类型</th>
+                            <th>标题</th>
+                            <th>状态</th>
+                            <th>提交时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for feedback in page_obj %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-{{ feedback.feedback_type|yesno:'danger,info,warning,success,secondary' }}">
+                                    {{ feedback.get_feedback_type_display }}
+                                </span>
+                            </td>
+                            <td>{{ feedback.title }}</td>
+                            <td>
+                                {% if feedback.is_resolved %}
+                                <span class="badge bg-success">已解决</span>
+                                {% else %}
+                                <span class="badge bg-warning">处理中</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ feedback.created_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-chat display-1 text-muted"></i>
+                <p class="text-muted mt-3">还没有提交过反馈</p>
+                <a href="{% url 'submit_feedback' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> 提交反馈
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- 分页 -->
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
