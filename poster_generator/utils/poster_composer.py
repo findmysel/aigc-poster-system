@@ -7,6 +7,28 @@ import io
 from django.core.files.base import ContentFile
 
 
+# 跨平台中文字体候选（Windows 微软雅黑 / Linux Noto CJK / macOS 苹方）
+FONT_CANDIDATES = [
+    "msyh.ttc",
+    "C:/Windows/Fonts/msyh.ttc",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc",
+    "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+    "/System/Library/Fonts/PingFang.ttc",
+]
+
+
+def load_cjk_font(size):
+    """按候选顺序加载中文字体，全部失败时用 PIL 默认字体"""
+    for path in FONT_CANDIDATES:
+        try:
+            return ImageFont.truetype(path, size)
+        except Exception:
+            continue
+    return ImageFont.load_default()
+
+
 class PosterComposer:
     """海报合成器"""
     
@@ -57,18 +79,11 @@ class PosterComposer:
         """
         layout_config = self.LAYOUTS.get(layout, self.LAYOUTS['center'])
         
-        # 加载字体（使用系统默认字体）
-        try:
-            font_headline = ImageFont.truetype("msyh.ttc", headline_size)  # 微软雅黑
-            font_subheadline = ImageFont.truetype("msyh.ttc", subheadline_size)
-            font_cta = ImageFont.truetype("msyh.ttc", cta_size)
-            font_description = ImageFont.truetype("msyh.ttc", description_size)
-        except:
-            # 如果找不到中文字体，使用默认字体
-            font_headline = ImageFont.load_default()
-            font_subheadline = ImageFont.load_default()
-            font_cta = ImageFont.load_default()
-            font_description = ImageFont.load_default()
+        # 加载中文字体（跨平台候选，见 load_cjk_font）
+        font_headline = load_cjk_font(headline_size)
+        font_subheadline = load_cjk_font(subheadline_size)
+        font_cta = load_cjk_font(cta_size)
+        font_description = load_cjk_font(description_size)
         
         # 根据布局计算位置
         if layout_config['text_position'] == 'center':
@@ -125,7 +140,7 @@ class PosterComposer:
             for idx, line in enumerate(lines[:2]):
                 bbox = self.draw.textbbox((0, 0), line, font=font_description)
                 x = (self.width - (bbox[2] - bbox[0])) // 2
-                self._draw_text_with_shadow(x, y_position + 58 + idx * (description_size + 8), line, font_description, text_color)
+                self._draw_text_with_shadow(x, y_position + 76 + idx * (description_size + 8), line, font_description, text_color)
             desc_lines = min(len(lines), 2)
 
         # 绘制CTA按钮背景
@@ -141,7 +156,7 @@ class PosterComposer:
             button_height = text_height + button_padding_y * 2
             
             button_x = (self.width - button_width) // 2
-            button_y = y_position + 100 + (desc_lines * 34 if desc_lines else 0)
+            button_y = y_position + 100 + (desc_lines * 40 if desc_lines else 0)
             
             # 绘制按钮背景
             self.draw.rounded_rectangle(
@@ -173,10 +188,7 @@ class PosterComposer:
     
     def add_watermark(self, text='AIGC Poster', position='bottom-right', opacity=64):
         """添加水印"""
-        try:
-            font = ImageFont.truetype("msyh.ttc", 20)
-        except:
-            font = ImageFont.load_default()
+        font = load_cjk_font(20)
         
         # 创建水印层
         watermark = Image.new('RGBA', self.background.size, (255, 255, 255, 0))
