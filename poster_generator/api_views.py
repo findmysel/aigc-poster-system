@@ -180,7 +180,7 @@ def api_toggle_favorite(request, project_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_poster_feedback(request, project_id):
-    """POST /api/posters/<id>/feedback/  → 提交反馈（可触发重新生成）"""
+    """POST /api/posters/<id>/feedback/  → 提交反馈（可触发重新生成，新建记录不覆盖原版）"""
     project = get_object_or_404(PosterProject, id=project_id, user=request.user)
 
     serializer = FeedbackSerializer(data=request.data)
@@ -188,11 +188,19 @@ def api_poster_feedback(request, project_id):
         return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     data = serializer.validated_data
+
+    from .models import PosterFeedback
+    PosterFeedback.objects.create(
+        poster=project,
+        user=request.user,
+        rating=data['satisfaction'],
+        feedback_type=data.get('feedback_type', ''),
+        content=data.get('feedback_text', ''),
+    )
     project.user_satisfaction = data['satisfaction']
     project.user_feedback = data.get('feedback_text', '')
     project.save()
 
-    # 更新画像满意度
     try:
         request.user.profile.update_satisfaction(data['satisfaction'] / 5.0)
     except Exception:
@@ -203,7 +211,16 @@ def api_poster_feedback(request, project_id):
         data.get('adjust_layout'), data.get('adjust_copy'),
     ])
 
+    target = project
     if needs_regen:
+        target = PosterProject.objects.create(
+            user=request.user,
+            title=project.title,
+            description=project.description,
+            user_prompt=project.user_prompt,
+            status='generating',
+            parent_project=project,
+        )
         gen_params = project.get_generation_params()
         gen_params['feedback_adjustments'] = {
             'adjust_style': data.get('adjust_style'),
@@ -211,15 +228,16 @@ def api_poster_feedback(request, project_id):
             'adjust_layout': data.get('adjust_layout'),
             'adjust_copy': data.get('adjust_copy'),
         }
-        project.set_generation_params(gen_params)
-        project.status = 'generating'
-        project.save()
+        target.set_generation_params(gen_params)
+        target.save()
 
-        success, result = perform_generation(project, request.user.profile)
+        success, result = perform_generation(target, request.user.profile)
         if not success:
+            target.status = 'failed'
+            target.save()
             return Response({'detail': f'重新生成失败：{result}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    out_serializer = PosterProjectDetailSerializer(project, context={'request': request})
+    out_serializer = PosterProjectDetailSerializer(target, context={'request': request})
     return Response(out_serializer.data)
 
 

@@ -44,7 +44,7 @@ class PosterComposer:
         self.width, self.height = self.background.size
     
     def compose(self, copy_data, layout='center', text_color='#FFFFFF', 
-                headline_size=60, subheadline_size=36, cta_size=28):
+                headline_size=60, subheadline_size=36, cta_size=28, description_size=24):
         """
         合成海报
         :param copy_data: 文案数据 {'headline': '', 'subheadline': '', 'cta': ''}
@@ -62,11 +62,13 @@ class PosterComposer:
             font_headline = ImageFont.truetype("msyh.ttc", headline_size)  # 微软雅黑
             font_subheadline = ImageFont.truetype("msyh.ttc", subheadline_size)
             font_cta = ImageFont.truetype("msyh.ttc", cta_size)
+            font_description = ImageFont.truetype("msyh.ttc", description_size)
         except:
             # 如果找不到中文字体，使用默认字体
             font_headline = ImageFont.load_default()
             font_subheadline = ImageFont.load_default()
             font_cta = ImageFont.load_default()
+            font_description = ImageFont.load_default()
         
         # 根据布局计算位置
         if layout_config['text_position'] == 'center':
@@ -103,6 +105,29 @@ class PosterComposer:
             x = (self.width - text_width) // 2
             self._draw_text_with_shadow(x, y_position + 20, subheadline, font_subheadline, text_color)
         
+        # 绘制描述文字（需求 5.3.2 步骤6：主标题、副标题、CTA 和描述都要合成）
+        description = copy_data.get('description', '')
+        desc_lines = 0
+        if description:
+            max_width = self.width - 80
+            lines = []
+            current = ''
+            for ch in description:
+                trial = current + ch
+                bbox = self.draw.textbbox((0, 0), trial, font=font_description)
+                if bbox[2] - bbox[0] > max_width and current:
+                    lines.append(current)
+                    current = ch
+                else:
+                    current = trial
+            if current:
+                lines.append(current)
+            for idx, line in enumerate(lines[:2]):
+                bbox = self.draw.textbbox((0, 0), line, font=font_description)
+                x = (self.width - (bbox[2] - bbox[0])) // 2
+                self._draw_text_with_shadow(x, y_position + 58 + idx * (description_size + 8), line, font_description, text_color)
+            desc_lines = min(len(lines), 2)
+
         # 绘制CTA按钮背景
         cta = copy_data.get('cta', '')
         if cta:
@@ -116,7 +141,7 @@ class PosterComposer:
             button_height = text_height + button_padding_y * 2
             
             button_x = (self.width - button_width) // 2
-            button_y = y_position + 100
+            button_y = y_position + 100 + (desc_lines * 34 if desc_lines else 0)
             
             # 绘制按钮背景
             self.draw.rounded_rectangle(

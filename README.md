@@ -11,9 +11,9 @@
                                                           ↓
 下载海报 ← 保存/下载海报 ← 是 ← 用户是否满意? ← 预览与编辑 ← 海报合成与布局优化
                                         ↓ 否
-                                        反馈调整参数 ← GPT-4o-mini生成文案
+                                        反馈调整参数 ← GLM-4-Flash生成文案（免费）
                                                               ↑
-                                                Stable Diffusion XL生成图像
+                                                CogView-3-Flash / Stable Diffusion生成图像
 ```
 
 ## 技术栈
@@ -21,9 +21,10 @@
 - **后端**: Django 4.2+
 - **前端**: HTML5, CSS3, Bootstrap 5
 - **数据库**: MySQL 5.7+ / MariaDB 10.3+
-- **AI集成**: 
-  - Stable Diffusion XL（图像生成）
-  - GPT-4o-mini（文案生成）
+- **AI集成（均为免费方案，不使用收费的 GPT API）**: 
+  - 智谱 GLM-4-Flash（文案生成，免费模型）
+  - 智谱 CogView-3-Flash（图像生成，免费模型，默认后端）
+  - 本地 Stable Diffusion WebUI（图像生成，可切换后端，本地部署免费无 Key）
 
 ## 功能模块
 
@@ -115,11 +116,14 @@ DB_PASSWORD=your_mysql_password
 DB_HOST=localhost
 DB_PORT=3306
 
-# OpenAI API密钥（用于GPT-4o-mini）
-OPENAI_API_KEY=your-openai-api-key
+# 智谱 AI API Key（免费，从 https://bigmodel.cn/ 注册获取）
+ZHIPUAI_API_KEY=<redacted>
 
-# Stable Diffusion API地址
-SD_API_URL=http://localhost:7860/sdapi/v1/txt2img
+# 图像后端：zhipu（智谱免费API，默认）/ sd（本地 Stable Diffusion）
+IMAGE_BACKEND=zhipu
+
+# 本地 Stable Diffusion WebUI API地址（IMAGE_BACKEND=sd 时使用）
+SD_API_URL=http://127.0.0.1:7860/sdapi/v1/txt2img
 
 ### 6. 数据库迁移
 
@@ -204,26 +208,47 @@ aigc_poster_system/
 
 ## API配置说明
 
-### Stable Diffusion XL
+系统只使用免费模型/免费方案，不使用收费的 GPT API。
 
-系统默认使用模拟图像生成器，如需连接真实的SD服务：
+### 文案生成：智谱 GLM-4-Flash（免费）
 
-1. 部署本地或云端Stable Diffusion服务
-2. 在 `.env` 中配置 `SD_API_URL`
-3. 修改 `poster_generator/utils/image_generator.py` 使用真实API
+1. 在 [智谱开放平台](https://bigmodel.cn/) 注册账号并获取 API Key
+2. 在 `.env` 中配置 `ZHIPUAI_API_KEY`
+3. 未配置 Key 时自动使用本地模板文案降级，系统仍可演示
 
-### GPT-4o-mini
+### 图像生成：双后端可切换
 
-1. 在 [OpenAI](https://openai.com/) 注册账号并获取API密钥
-2. 在 `.env` 中配置 `OPENAI_API_KEY`
-3. 文案生成功式将自动调用API
+通过 `.env` 的 `IMAGE_BACKEND` 切换：
+
+- `zhipu`（默认）：智谱 CogView-3-Flash 免费云端 API，联网即可用
+- `sd`：本地 Stable Diffusion WebUI。本地启动 SD WebUI 时加 `--api` 参数，
+  默认接口 `http://127.0.0.1:7860/sdapi/v1/txt2img`，可在 `.env` 的 `SD_API_URL` 修改
+
+任一后端不可用（无 Key、服务未启动、下载失败）时，系统自动降级为
+渐变占位图并提示“已使用备用结果”，不会导致生成失败。
+
+## 系统链路（导师版总体思路）
+
+```
+用户行为数据（生成/浏览/下载/收藏/编辑/反馈落库）
+  → 用户画像构建（手动偏好 + 行为聚合：生成次数、常用标签）
+  → 个性化提示词生成（画像偏好 + 本次风格/色彩/语气/尺寸参数）
+  → 海报生成（GLM-4-Flash 文案 + CogView / Stable Diffusion 图像 + Pillow 合成）
+  → 海报质量评估（清晰度/对比度/色彩丰富度/饱和度/亮度适中度，综合分 0-100）
+  → 可视化展示（画像分析图表、质量趋势、海报墙、质量明细）
+```
+
+同一主题（如“校园音乐节海报”）对不同画像用户生成不同海报：
+极简/冷色/科技感用户与插画/暖色/活泼用户得到的提示词、配色和成图风格明显不同。
 
 ## 开发计划
 
-- [ ] 接入真实Stable Diffusion API
-- [ ] 接入真实GPT-4o-mini API
+- [x] 接入智谱 GLM-4-Flash 免费文案 API
+- [x] 接入智谱 CogView-3-Flash 免费图像 API
+- [x] 接入本地 Stable Diffusion WebUI（双后端切换）
+- [x] 用户行为数据采集与画像动态构建
+- [x] 海报质量评估与可视化展示
 - [ ] 添加更多海报模板
 - [ ] 实现批量生成功能
 - [ ] 添加海报分享功能
-- [ ] 实现用户画像智能学习
 

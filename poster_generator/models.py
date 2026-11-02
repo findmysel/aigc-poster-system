@@ -131,6 +131,27 @@ class PosterProject(models.Model):
     
     # 是否收藏
     is_favorite = models.BooleanField(default=False, verbose_name='是否收藏')
+
+    # 海报质量评估（导师链路：生成后本地评估，结果存入记录）
+    quality_score = models.FloatField(null=True, blank=True, verbose_name='质量综合评分(0-100)')
+    quality_detail = models.TextField(default='{}', blank=True, verbose_name='质量评估明细(JSON)')
+
+    def get_quality_detail(self):
+        try:
+            return json.loads(self.quality_detail)
+        except Exception:
+            return {}
+
+    def set_quality_detail(self, detail):
+        self.quality_detail = json.dumps(detail, ensure_ascii=False)
+
+    # 图像生成后端：zhipu（智谱免费API）/ sd（本地Stable Diffusion）
+    image_backend = models.CharField(max_length=20, blank=True, verbose_name='图像后端')
+
+    # 重新生成 lineage：根据反馈重新生成时新建记录并指向原海报，不覆盖原版（需求 5.4）
+    parent_project = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='regenerations', verbose_name='重新生成的来源海报')
     
     # 时间戳
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
@@ -242,3 +263,34 @@ class GenerationTask(models.Model):
     
     def __str__(self):
         return f"{self.project.title} - {self.task_type}"
+
+
+class PosterFeedback(models.Model):
+    """
+    海报反馈记录（需求 5.4 / 6.1 PosterFeedback 实体）
+    与通用意见反馈（feedback.Feedback）区分：这里是针对单张海报的
+    评分 + 问题类型 + 文字反馈，重新生成时保留不覆盖。
+    """
+    FEEDBACK_TYPE_CHOICES = [
+        ('copy', '文案不合适'),
+        ('style', '风格不符'),
+        ('color', '颜色不合适'),
+        ('layout', '布局不合理'),
+        ('quality', '图片质量不足'),
+        ('other', '其他'),
+    ]
+
+    poster = models.ForeignKey(PosterProject, on_delete=models.CASCADE, related_name='feedbacks', verbose_name='海报')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='poster_feedbacks', verbose_name='用户')
+    rating = models.IntegerField(verbose_name='评分(1-5)')
+    feedback_type = models.CharField(max_length=20, choices=FEEDBACK_TYPE_CHOICES, blank=True, verbose_name='问题类型')
+    content = models.TextField(blank=True, verbose_name='反馈内容')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+
+    class Meta:
+        verbose_name = '海报反馈'
+        verbose_name_plural = verbose_name
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} 对《{self.poster.title}》的反馈（{self.rating}星）"

@@ -2,6 +2,40 @@
 
 {% block title %}画像分析 - AIGC海报工坊{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    const chartData = {{ chart_data|safe }};
+    const actionLabels = {'generate': '生成', 'view': '浏览', 'edit': '编辑', 'save': '收藏', 'download': '下载', 'feedback': '反馈', 'adjust': '调整'};
+    const actionCounts = chartData.action_counts || {};
+    new Chart(document.getElementById('actionChart'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(actionCounts).map(k => actionLabels[k] || k),
+            datasets: [{data: Object.values(actionCounts), backgroundColor: ['#FF6B35','#4ECDC4','#FFD166','#764ba2','#56AB2F','#999999']}]
+        }
+    });
+    const contentCounts = chartData.content_counts || {};
+    new Chart(document.getElementById('contentChart'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(contentCounts),
+            datasets: [{label: '生成次数', data: Object.values(contentCounts), backgroundColor: '#4ECDC4'}]
+        },
+        options: {plugins: {legend: {display: false}}}
+    });
+    const qt = chartData.quality_trend || {labels: [], scores: []};
+    new Chart(document.getElementById('qualityChart'), {
+        type: 'line',
+        data: {
+            labels: qt.labels,
+            datasets: [{label: '质量综合评分', data: qt.scores, borderColor: '#FF6B35', backgroundColor: 'rgba(255,107,53,0.15)', fill: true, tension: 0.3}]
+        },
+        options: {scales: {y: {min: 0, max: 100}}}
+    });
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <div class="row">
@@ -102,6 +136,39 @@
                     </div>
                     {% else %}
                     <p class="text-muted text-center mb-0">暂无行为数据</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 数据可视化 -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-pie-chart"></i> 数据可视化（行为 → 画像 → 生成质量）</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h6 class="text-center text-muted">行为分布</h6>
+                            <canvas id="actionChart" height="220"></canvas>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h6 class="text-center text-muted">生成内容类型分布</h6>
+                            <canvas id="contentChart" height="220"></canvas>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-center text-muted">海报质量评分趋势</h6>
+                            <canvas id="qualityChart" height="140"></canvas>
+                        </div>
+                    </div>
+                    {% if favorite_tags %}
+                    <div class="mt-2">
+                        <span class="text-muted small">行为聚合出的常用标签：</span>
+                        {% for tag in favorite_tags %}
+                        <span class="badge bg-primary">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
                     {% endif %}
                 </div>
             </div>

@@ -106,3 +106,4 @@ class FeedbackSerializer(serializers.Serializer):
     adjust_color = serializers.BooleanField(required=False, default=False)
     adjust_layout = serializers.BooleanField(required=False, default=False)
     adjust_copy = serializers.BooleanField(required=False, default=False)
+    feedback_type = serializers.CharField(required=False, allow_blank=True, default='')

@@ -115,14 +115,13 @@ class UserProfile(models.Model):
         return f"{self.user.username} 的用户画像"
     
     def update_satisfaction(self, new_score):
-        """更新满意度评分"""
-        if self.generation_count == 0:
+        """更新满意度评分（滑动平均）。
+        注意：generation_count 由行为聚合 refresh_profile_from_behavior 维护，
+        生成即计数，不再在这里 +1，避免只有评分过的海报才计数。"""
+        if not self.satisfaction_score:
             self.satisfaction_score = new_score
         else:
-            # 加权平均
-            total = self.satisfaction_score * self.generation_count + new_score
-            self.satisfaction_score = total / (self.generation_count + 1)
-        self.generation_count += 1
+            self.satisfaction_score = self.satisfaction_score * 0.7 + new_score * 0.3
         self.save()
 
 

@@ -34,6 +34,26 @@
     </div>
 </section>
 
+<!-- 系统公告 -->
+{% if notices %}
+<section class="container mb-5">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-megaphone text-warning"></i> 系统公告</h5>
+            <a href="{% url 'notices' %}" class="btn btn-sm btn-outline-primary rounded-pill">查看全部</a>
+        </div>
+        <div class="list-group list-group-flush">
+            {% for notice in notices %}
+            <a href="{% url 'notice_detail' notice.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span>{{ notice.title }}</span>
+                <small class="text-muted">{{ notice.created_at|date:"Y-m-d" }}</small>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- 特色介绍 -->
 <section class="container mb-5">
     <div class="text-center mb-5">

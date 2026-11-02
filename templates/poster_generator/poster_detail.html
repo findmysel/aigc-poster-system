@@ -91,6 +91,48 @@
                 </div>
             </div>
             
+            <!-- 海报质量评估 -->
+            {% if project.quality_score %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-award"></i> 海报质量评估</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <h3 class="mb-0">{{ project.quality_score|floatformat:1 }} <small class="text-muted fs-6">/ 100</small></h3>
+                        <span class="badge bg-success">{{ quality_detail.level }}</span>
+                    </div>
+                    {% for key, value in quality_detail.metrics.items %}
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between small">
+                            <span>{% if key == 'sharpness' %}清晰度{% elif key == 'contrast' %}对比度{% elif key == 'colorfulness' %}色彩丰富度{% elif key == 'saturation' %}饱和度{% elif key == 'brightness_balance' %}亮度适中度{% else %}{{ key }}{% endif %}</span>
+                            <span>{{ value }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ value }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if quality_detail.suggestions %}
+                    <div class="small text-muted mt-2">
+                        {% for tip in quality_detail.suggestions %}
+                        <div><i class="bi bi-lightbulb"></i> {{ tip }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if project.parent_project %}
+                    <div class="small text-muted mt-2">
+                        <i class="bi bi-arrow-repeat"></i> 本海报由反馈重新生成，来源：
+                        <a href="{% url 'poster_detail' project.parent_project.id %}">{{ project.parent_project.title }}</a>
+                    </div>
+                    {% endif %}
+                    {% if project.image_backend %}
+                    <div class="small text-muted mt-1">图像后端：{% if project.image_backend == 'sd' %}本地 Stable Diffusion{% else %}智谱 CogView（免费 API）{% endif %}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
             <!-- 海报信息 -->
             <div class="card mb-4">
                 <div class="card-header">

@@ -84,7 +84,7 @@ class PromptGenerator:
         """
         self.profile = user_profile
     
-    def generate_image_prompt(self, user_description='', content_type='', style_override=''):
+    def generate_image_prompt(self, user_description='', content_type='', style_override='', color_override=''):
         """
         生成图像生成提示词
         :param user_description: 用户输入的描述
@@ -93,7 +93,7 @@ class PromptGenerator:
         :return: 优化后的提示词
         """
         profile_id = getattr(self.profile, 'id', 'unknown')
-        cache_key = f"img_prompt:{profile_id}:{content_type}:{style_override}:{user_description[:30]}"
+        cache_key = f"img_prompt:{profile_id}:{content_type}:{style_override}:{color_override}:{user_description[:30]}"
         cached = cache.get(cache_key)
         if cached:
             return cached
@@ -117,8 +117,8 @@ class PromptGenerator:
         if style and style in self.STYLE_KEYWORDS:
             components.append(self.STYLE_KEYWORDS[style])
         
-        # 4. 色彩
-        color = self.profile.preferred_color
+        # 4. 色彩（本次覆盖优先于画像偏好）
+        color = color_override or self.profile.preferred_color
         if color and color in self.COLOR_KEYWORDS:
             components.append(self.COLOR_KEYWORDS[color])
         

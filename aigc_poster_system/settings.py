@@ -87,10 +87,11 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD', '123456'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '3306'),
-        'OPTIONS': {
+        # MySQL 专用 OPTIONS 仅在 MySQL 引擎下生效，避免 SQLite 本地测试报错
+        **({'OPTIONS': {
             'charset': 'utf8mb4',
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        }} if 'mysql' in os.getenv('DB_ENGINE', 'django.db.backends.mysql') else {}),
     }
 }
 
@@ -154,10 +155,25 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # AIGC API配置
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
-ZHIPUAI_API_KEY = os.getenv('ZHIPUAI_API_KEY', '')
-SD_API_URL = os.getenv('SD_API_URL', 'http://localhost:7860/sdapi/v1/txt2img')
-SD_API_KEY = os.getenv('SD_API_KEY', '')
+# AIGC API配置（只使用免费模型，不使用收费的 GPT API）
+# 文案：智谱 GLM-4-Flash（免费）；图像：双后端可切换
+#   IMAGE_BACKEND=zhipu（默认）-> 智谱 CogView-3-Flash（免费云端 API）
+#   IMAGE_BACKEND=sd           -> 本地 Stable Diffusion WebUI API（本地部署，免费无 Key）
+ZHIPUAI_API_KEY = os.environ.get('ZHIPUAI_API_KEY', '')
+IMAGE_BACKEND = os.getenv('IMAGE_BACKEND', 'zhipu').lower()
+SD_API_URL = os.getenv('SD_API_URL', 'http://127.0.0.1:7860/sdapi/v1/txt2img')
+
+# 日志配置：模型调用失败/降级时保留错误日志供排查（需求 3.3）
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {'simple': {'format': '[{levelname}] {name}: {message}', 'style': '{'}},
+    'handlers': {'console': {'class': 'logging.StreamHandler', 'formatter': 'simple'}},
+    'loggers': {
+        'poster_generator': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+        'user_profile': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+    },
+}
 
 # Celery配置
 CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')

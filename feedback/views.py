@@ -42,3 +42,10 @@ def notices(request):
     """系统公告"""
     notices = SystemNotice.objects.filter(is_active=True)
     return render(request, 'feedback/notices.html', {'notices': notices})
+
+
+def notice_detail(request, notice_id):
+    """系统公告详情"""
+    from django.shortcuts import get_object_or_404
+    notice = get_object_or_404(SystemNotice, id=notice_id, is_active=True)
+    return render(request, 'feedback/notice_detail.html', {'notice': notice})

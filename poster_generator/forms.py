@@ -72,6 +72,50 @@ class PosterGenerateForm(forms.Form):
         label='风格选择（覆盖画像偏好）'
     )
     
+    # 语气风格（需求 5.3.1）
+    tone = forms.ChoiceField(
+        choices=[
+            ('', '自动选择（根据用户画像）'),
+            ('professional', '专业正式'),
+            ('casual', '轻松活泼'),
+            ('warm', '温暖亲切'),
+            ('humorous', '幽默有趣'),
+            ('formal', '严肃庄重'),
+        ],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='语气风格'
+    )
+
+    # 色彩方案覆盖（需求 5.3.1）
+    color_override = forms.ChoiceField(
+        choices=[
+            ('', '使用用户画像偏好'),
+            ('warm', '暖色调'),
+            ('cool', '冷色调'),
+            ('neutral', '中性色'),
+            ('vibrant', '高饱和'),
+            ('monochrome', '黑白'),
+            ('pastel', '马卡龙'),
+        ],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='色彩方案（覆盖画像偏好）'
+    )
+
+    # 尺寸和方向（需求 5.3.1 / 5.3.4）
+    size = forms.ChoiceField(
+        choices=[
+            ('portrait', '竖版 512×768'),
+            ('landscape', '横版 768×512'),
+            ('square', '方形 768×768'),
+        ],
+        required=False,
+        initial='portrait',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='尺寸和方向'
+    )
+
     # 高级选项
     use_custom_copy = forms.BooleanField(
         required=False,
@@ -162,6 +206,21 @@ class PosterFeedbackForm(forms.Form):
             'placeholder': '请告诉我们您对这张海报的看法，或希望如何改进...'
         }),
         label='详细反馈（可选）'
+    )
+
+    feedback_type = forms.ChoiceField(
+        choices=[
+            ('', '未选择'),
+            ('copy', '文案不合适'),
+            ('style', '风格不符'),
+            ('color', '颜色不合适'),
+            ('layout', '布局不合理'),
+            ('quality', '图片质量不足'),
+            ('other', '其他'),
+        ],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='问题类型（可选）'
     )
     
     # 调整参数

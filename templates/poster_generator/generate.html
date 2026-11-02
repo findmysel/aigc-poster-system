@@ -44,6 +44,22 @@
                             </div>
                         </div>
                         
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">语气风格</label>
+                                {{ form.tone }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">色彩方案</label>
+                                {{ form.color_override }}
+                                <div class="form-text">选择后会覆盖用户画像中的色彩偏好</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">尺寸和方向</label>
+                                {{ form.size }}
+                            </div>
+                        </div>
+                        
                         <div class="mb-3">
                             <label class="form-label">自定义提示词（可选）</label>
                             {{ form.custom_prompt }}

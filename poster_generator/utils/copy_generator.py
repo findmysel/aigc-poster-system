@@ -51,7 +51,7 @@ class CopyGenerator:
                 ]
             )
             raw = response.choices[0].message.content
-            copy_data = self._parse_response(raw)
+            copy_data = self._fill_defaults(self._parse_response(raw))
             return {'success': True, 'data': copy_data}
         except Exception:
             return {'success': True, 'data': self._generate_mock_copy(topic, content_type)}
@@ -84,7 +84,7 @@ class CopyGenerator:
                 ]
             )
             raw = response.choices[0].message.content
-            copy_data = self._parse_response(raw)
+            copy_data = self._fill_defaults(self._parse_response(raw))
             return {'success': True, 'data': copy_data}
         except Exception:
             return {'success': True, 'data': self._generate_mock_copy(feedback, content_type)}
@@ -105,12 +105,28 @@ class CopyGenerator:
             pass
         # 降级：将文本内容塞入字段
         text = content.strip()
-        return {
+        return self._fill_defaults({
             'headline': text[:20] if text else '精彩内容',
             'subheadline': text[20:50] if len(text) > 20 else '欢迎关注',
             'cta': '立即了解',
             'description': text[:80] if text else '',
+        })
+
+    @staticmethod
+    def _fill_defaults(copy_data):
+        """文案字段缺失时用默认值补全（需求 5.3.3）"""
+        defaults = {
+            'headline': '精彩内容',
+            'subheadline': '欢迎关注',
+            'cta': '立即了解',
+            'description': '更多精彩内容，敬请期待。',
         }
+        if not isinstance(copy_data, dict):
+            return defaults
+        for key, value in defaults.items():
+            if not copy_data.get(key):
+                copy_data[key] = value
+        return copy_data
 
     def _generate_mock_copy(self, topic, content_type):
         """无 API key 或 API 失败时的模板降级"""
@@ -174,13 +190,25 @@ class TemplateCopyProvider:
         ],
     }
 
+    DESCRIPTIONS = {
+        'promotion': '精选好物限时优惠，错过等一年！',
+        'event': '精彩内容等你来，与志同道合的朋友一起！',
+        'brand': '专注品质，用心服务，为您创造美好生活。',
+        'social': '生活需要仪式感，记录每一个精彩瞬间。',
+        'holiday': '把最真挚的祝福，送给最重要的你。',
+    }
+
     @classmethod
     def get_copy(cls, content_type, index=0):
         templates = cls.TEMPLATES.get(content_type, cls.TEMPLATES['promotion'])
-        return templates[index % len(templates)]
+        result = dict(templates[index % len(templates)])
+        result.setdefault('description', cls.DESCRIPTIONS.get(content_type, cls.DESCRIPTIONS['promotion']))
+        return result
 
     @classmethod
     def get_random_copy(cls, content_type):
         import random
         templates = cls.TEMPLATES.get(content_type, cls.TEMPLATES['promotion'])
-        return random.choice(templates)
+        result = dict(random.choice(templates))
+        result.setdefault('description', cls.DESCRIPTIONS.get(content_type, cls.DESCRIPTIONS['promotion']))
+        return result

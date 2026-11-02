@@ -2,7 +2,7 @@
 海报生成Admin配置
 """
 from django.contrib import admin
-from .models import PosterTemplate, PosterProject, PosterDraft, GenerationTask
+from .models import PosterTemplate, PosterProject, PosterDraft, GenerationTask, PosterFeedback
 
 
 @admin.register(PosterTemplate)
@@ -18,7 +18,7 @@ class PosterProjectAdmin(admin.ModelAdmin):
         'title', 'user', 'status', 'is_favorite',
         'user_satisfaction', 'created_at'
     ]
-    list_filter = ['status', 'is_favorite', 'created_at']
+    list_filter = ['status', 'is_favorite', 'created_at', 'user']
     search_fields = ['title', 'user__username', 'user_prompt']
     readonly_fields = ['created_at', 'updated_at']
 
@@ -34,3 +34,11 @@ class GenerationTaskAdmin(admin.ModelAdmin):
     list_display = ['project', 'task_type', 'status', 'created_at', 'completed_at']
     list_filter = ['task_type', 'status', 'created_at']
     readonly_fields = ['created_at', 'started_at', 'completed_at']
+
+
+@admin.register(PosterFeedback)
+class PosterFeedbackAdmin(admin.ModelAdmin):
+    list_display = ['poster', 'user', 'rating', 'feedback_type', 'created_at']
+    list_filter = ['feedback_type', 'rating', 'created_at']
+    search_fields = ['content', 'user__username', 'poster__title']
+    readonly_fields = ['created_at']

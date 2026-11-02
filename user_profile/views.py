@@ -163,10 +163,17 @@ def profile_analysis(request):
     if not profile.preferred_style:
         suggestions.append('建议设置偏好的设计风格以获得更好的生成效果')
     
+    # 可视化数据（行为分布/内容与风格分布/质量评分趋势）
+    import json as _json
+    from .behavior import behavior_stats
+    stats = behavior_stats(request.user)
+
     context = {
         'profile': profile,
         'action_counts': action_counts,
         'suggestions': suggestions,
-        'recent_logs': recent_logs[:10]
+        'recent_logs': recent_logs[:10],
+        'chart_data': _json.dumps(stats, ensure_ascii=False),
+        'favorite_tags': profile.get_favorite_tags(),
     }
     return render(request, 'user_profile/analysis.html', context)
