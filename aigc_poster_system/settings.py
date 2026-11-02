@@ -23,6 +23,10 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+# 部署在 HTTPS 反向代理之后（如 GitHub Codespaces 端口转发）时，
+# 通过环境变量声明可信来源，避免表单提交被 CSRF 校验拦截。
+CSRF_TRUSTED_ORIGINS = [o for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o]
+
 
 # Application definition
 
